@@ -19,8 +19,14 @@ const restaurants = document.querySelector(".restaurants");
 const menu = document.querySelector(".menu");
 const logo = document.querySelector(".logo");
 const cardsMenu = document.querySelector(".cards-menu");
+const modalBody = document.querySelector(".modal-body");
+const modalPrice = document.querySelector(".modal-pricetag");
+const buttonClearCart = document.querySelector(".clear-cart");
 
-// const cardsMenu = document.querySelector(".cards-menu");
+let login = localStorage.getItem("delivery-food");
+const cart = [];
+
+// const buttonClearCart = document.querySelector(".button clear-cart");
 const getData = async function (url) {
   const responce = await fetch(url);
 
@@ -34,8 +40,6 @@ const getData = async function (url) {
 };
 // getData("./db/partners.json");
 
-let login = localStorage.getItem("delivery-food");
-
 function toggleModal() {
   modal.classList.toggle("is-open");
 }
@@ -44,7 +48,7 @@ function toggleModalAuth() {
 }
 
 function autorized() {
-  console.log("autorized");
+  console.log("!!!Autorized");
 
   function logOut(event) {
     event.preventDefault();
@@ -53,6 +57,8 @@ function autorized() {
     buttonAuth.style.display = "";
     userName.style.display = "";
     buttonOut.style.display = "";
+    cartButton.style.display = "";
+
     buttonOut.removeEventListener("click", logOut);
     checkAuth();
   }
@@ -60,8 +66,8 @@ function autorized() {
   userName.textContent = login;
   buttonAuth.style.display = "none";
   userName.style.display = "inline";
-  buttonOut.style.display = "block";
-
+  buttonOut.style.display = "flex";
+  cartButton.style.display = "flex";
   buttonOut.addEventListener("click", logOut);
 }
 
@@ -131,17 +137,16 @@ function createCardRestaurants({
 }
 
 function createCardGood(goods) {
-  console.log(goods);
+  // console.log(goods);
   const { id, name, description, price, image } = goods;
 
   const card = document.createElement("div");
   card.className = "card";
+  // card.id = id;
   // Лучше так а не через  "card.innerHTML = "" (отсутствует сериализация в строку)
   card.insertAdjacentHTML(
     "beforeend",
-    `
-
-				                            		<img src=${image} alt="image" class="card-image"/>
+    `                		<img src=${image} alt="image" class="card-image"/>
 						<div class="card-text">
 							<div class="card-heading">
 								<h3 class="card-title card-title-reg">${name}</h3>
@@ -153,11 +158,11 @@ function createCardGood(goods) {
 							</div>
 							<!-- /.card-info -->
 							<div class="card-buttons">
-								<button class="button button-primary button-add-cart">
+								<button class="button button-primary button-add-cart" id = "${id}">
 									<span class="button-card-text">В корзину</span>
 									<span class="button-cart-svg"></span>
 								</button>
-								<strong class="card-price-bold">${price} ₽</strong>
+								<strong class="card-price card-price-bold">${price} ₽</strong>
 							</div>
 						</div>
 						<!-- /.card-text -->
@@ -170,7 +175,7 @@ function createCardGood(goods) {
 function openGoods(event) {
   const target = event.target;
   const restaurant = target.closest(".card-restaurant");
-  console.log(restaurant);
+  // console.log(restaurant);
   if (restaurant) {
     if (!login) {
       toggleModalAuth();
@@ -195,12 +200,96 @@ new Swiper(".swiper-container", {
   sliderPerColumn: 1,
 });
 
+function addToCart(event) {
+  const target = event.target;
+  const buttonAddToCart = target.closest(".button-add-cart");
+  if (buttonAddToCart) {
+    const card = target.closest(".card");
+    const title = card.querySelector(".card-title-reg").textContent;
+    const cost = card.querySelector(".card-price").textContent;
+    const id = buttonAddToCart.id;
+
+    const food = cart.find(function (item) {
+      return item.id === id;
+    });
+
+    if (food) {
+      food.count += 1;
+    } else {
+      cart.push({
+        id,
+        title,
+        cost,
+        count: 1,
+      });
+    }
+
+    // console.log(cart);
+  }
+}
+
+function renderCart() {
+  modalBody.textContent = "";
+  cart.forEach(function ({ id, title, cost, count }) {
+    const itemCart = `
+              <div class="food-row">
+    <span class="food-name">${title}</span>
+    <strong class="food-price">${cost}</strong>
+    <div class="food-counter">
+      <button class="counter-button counter-minus" data-id=${id}>-</button>
+      <span class="counter">${count}</span>
+      <button class="counter-button counter-plus" data-id=${id}>+</button>
+    </div>
+  </div>
+  <!-- /.foods-row -->`;
+    modalBody.insertAdjacentHTML("afterbegin", itemCart);
+  });
+  const totalPrice = cart.reduce(function (result, item) {
+    return result + parseFloat(item.cost) * item.count;
+  }, 0);
+  modalPrice.textContent = totalPrice + "₽";
+}
+
+function changeCount(event) {
+  const target = event.target;
+  console.log(target.dataset.id);
+
+  if (target.classList.contains("counter-button")) {
+    const food = cart.find(function (item) {
+      return item.id === target.dataset.id;
+    });
+    if (target.classList.contains("counter-minus")) {
+      food.count--;
+      if (food.count === 0) {
+        cart.splice(cart.indexOf(food), 1);
+      }
+    }
+
+    if (target.classList.contains("counter-plus")) {
+      food.count++;
+    }
+    console.log(food);
+    renderCart();
+  }
+}
+
 function init() {
   getData("./db/partners.json").then(function (data) {
     data.forEach(createCardRestaurants);
   });
 
-  cartButton.addEventListener("click", toggleModal);
+  cartButton.addEventListener("click", function () {
+    renderCart();
+    toggleModal();
+  });
+
+  buttonClearCart.addEventListener("click", function () {
+    cart.length = 0;
+    renderCart();
+  });
+  modalBody.addEventListener("click", changeCount);
+
+  cardsMenu.addEventListener("click", addToCart);
 
   close.addEventListener("click", toggleModal);
 
