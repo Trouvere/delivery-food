@@ -26,6 +26,18 @@ const buttonClearCart = document.querySelector(".clear-cart");
 let login = localStorage.getItem("delivery-food");
 const cart = [];
 
+const loadCart = function () {
+  if (localStorage.getItem(login)) {
+    JSON.parse(localStorage.getItem(login)).forEach(function (item) {
+      cart.push(item);
+    });
+  }
+};
+
+const saveCart = function () {
+  localStorage.setItem(login, JSON.stringify(cart));
+};
+
 // const buttonClearCart = document.querySelector(".button clear-cart");
 const getData = async function (url) {
   const responce = await fetch(url);
@@ -53,6 +65,7 @@ function autorized() {
   function logOut(event) {
     event.preventDefault();
     login = null;
+    cart.length = 0;
     localStorage.removeItem("delivery-food");
     buttonAuth.style.display = "";
     userName.style.display = "";
@@ -69,6 +82,7 @@ function autorized() {
   buttonOut.style.display = "flex";
   cartButton.style.display = "flex";
   buttonOut.addEventListener("click", logOut);
+  loadCart();
 }
 
 function nonAautorized() {
@@ -226,6 +240,7 @@ function addToCart(event) {
 
     // console.log(cart);
   }
+  saveCart();
 }
 
 function renderCart() {
@@ -271,6 +286,7 @@ function changeCount(event) {
     console.log(food);
     renderCart();
   }
+  saveCart();
 }
 
 function init() {
