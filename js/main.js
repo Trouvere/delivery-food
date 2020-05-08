@@ -181,3 +181,10 @@ checkAuth();
 createCardRestaurants();
 createCardRestaurants();
 createCardRestaurants();
+
+new Swiper(".swiper-container", {
+  loop: true,
+  autoplay: { dalay: 3000 },
+  sliderPerViev: 1,
+  sliderPerColumn: 1,
+});
