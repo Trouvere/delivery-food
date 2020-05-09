@@ -56,6 +56,7 @@ function toggleModal() {
   modal.classList.toggle("is-open");
 }
 function toggleModalAuth() {
+  loginInput.style.borderColor = "";
   modalAuth.classList.toggle("is-open");
 }
 
@@ -91,14 +92,15 @@ function nonAautorized() {
   function logIn(event) {
     event.preventDefault();
     console.log("logIn");
-    login = loginInput.value;
-
-    if (!login) {
-      alert("Требуется ввести логин");
-    } else {
+    login = loginInput.value.trim();
+    if (login) {
       localStorage.setItem("delivery-food", login);
       logInForm.reset();
       toggleModalAuth();
+    } else {
+      loginInput.style.borderColor = "red";
+      loginInput.value = null;
+      alert("Требуется ввести логин");
     }
     buttonAuth.removeEventListener("click", toggleModalAuth);
     closeAuth.removeEventListener("click", toggleModalAuth);
