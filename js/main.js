@@ -26,6 +26,11 @@ const buttonClearCart = document.querySelector(".clear-cart");
 let login = localStorage.getItem("delivery-food");
 const cart = [];
 
+const valid = function (str) {
+  const nameReg = /^[а-яА-ЯёЁa-zA-Z][а-яА-ЯёЁa-zA-Z0-9-_\.]{1,20}$/;
+  return nameReg.test(str);
+};
+
 const loadCart = function () {
   if (localStorage.getItem(login)) {
     JSON.parse(localStorage.getItem(login)).forEach(function (item) {
@@ -74,6 +79,7 @@ function autorized() {
     cartButton.style.display = "";
 
     buttonOut.removeEventListener("click", logOut);
+    openLinkRestaurants();
     checkAuth();
   }
 
@@ -94,14 +100,25 @@ function nonAautorized() {
     console.log("logIn");
     login = loginInput.value.trim();
     if (login) {
-      localStorage.setItem("delivery-food", login);
-      logInForm.reset();
-      toggleModalAuth();
+      if (valid(login)) {
+        localStorage.setItem("delivery-food", login);
+        logInForm.reset();
+        toggleModalAuth();
+      } else {
+        loginInput.style.borderColor = "orange";
+        loginInput.value = null;
+        login = null;
+        alert("Недопустимый логин");
+        console.log(login);
+      }
     } else {
       loginInput.style.borderColor = "red";
       loginInput.value = null;
+
       alert("Требуется ввести логин");
+      console.log("Требуется ввести логин");
     }
+    console.log("checkAuth();");
     buttonAuth.removeEventListener("click", toggleModalAuth);
     closeAuth.removeEventListener("click", toggleModalAuth);
     logInForm.removeEventListener("submit", logIn);
@@ -197,10 +214,7 @@ function openGoods(event) {
       toggleModalAuth();
     } else {
       cardsMenu.textContent = "";
-      containerPromo.classList.add("hide");
-      restaurants.classList.add("hide");
-      menu.classList.remove("hide");
-
+      openLinkMenu();
       getData(`./db/${restaurant.dataset.products}`).then(function (data) {
         data.forEach(createCardGood);
       });
@@ -290,6 +304,16 @@ function changeCount(event) {
   }
   saveCart();
 }
+function openLinkRestaurants() {
+  containerPromo.classList.remove("hide");
+  restaurants.classList.remove("hide");
+  menu.classList.add("hide");
+}
+function openLinkMenu() {
+  containerPromo.classList.add("hide");
+  restaurants.classList.add("hide");
+  menu.classList.remove("hide");
+}
 
 function init() {
   getData("./db/partners.json").then(function (data) {
@@ -313,11 +337,7 @@ function init() {
 
   cardsRestaurants.addEventListener("click", openGoods);
 
-  logo.addEventListener("click", function () {
-    containerPromo.classList.remove("hide");
-    restaurants.classList.remove("hide");
-    menu.classList.add("hide");
-  });
+  logo.addEventListener("click", openLinkRestaurants);
 
   checkAuth();
 }
