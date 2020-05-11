@@ -22,6 +22,10 @@ const cardsMenu = document.querySelector(".cards-menu");
 const modalBody = document.querySelector(".modal-body");
 const modalPrice = document.querySelector(".modal-pricetag");
 const buttonClearCart = document.querySelector(".clear-cart");
+const restaurantTitle = document.querySelector(".restaurant-title");
+const rating = document.querySelector(".rating");
+const minPrice = document.querySelector(".price");
+const category = document.querySelector(".category");
 
 let login = localStorage.getItem("delivery-food");
 const cart = [];
@@ -147,26 +151,32 @@ function createCardRestaurants({
   products,
   time_of_delivery: timeOfDelivery,
 }) {
-  const card = `
-<a  class="card card-restaurant" data-products="${products}">
-<img src=${image} alt="image" class="card-image"/>
-<div class="card-text">
-  <div class="card-heading">
-    <h3 class="card-title">${name}</h3>
-    <span class="card-tag tag">${timeOfDelivery}</span>
-  </div>
-  <!-- /.card-heading -->
-  <div class="card-info">
-    <div class="rating">
-     ${stars}
+  const card = document.createElement("a");
+  card.className = "card card-restaurant";
+  card.products = products;
+  card.info = [name, price, stars, kitchen];
+  card.insertAdjacentHTML(
+    "beforeend",
+    `  
+  <img src=${image} alt="image" class="card-image"/>
+  <div class="card-text">
+    <div class="card-heading">
+      <h3 class="card-title">${name}</h3>
+      <span class="card-tag tag">${timeOfDelivery}</span>
     </div>
-    <div class="price">${price} ₽</div>
-    <div class="category">${kitchen}</div>
-  </div>  <!-- /.card-info -->
-</div> <!-- /.card-text -->
-</a>
-<!-- /.card -->`;
-  cardsRestaurants.insertAdjacentHTML("afterbegin", card);
+    <!-- /.card-heading -->
+    <div class="card-info">
+      <div class="rating">
+       ${stars}
+      </div>
+      <div class="price">${price} ₽</div>
+      <div class="category">${kitchen}</div>
+    </div>  <!-- /.card-info -->
+  </div> <!-- /.card-text -->
+  `
+  );
+
+  cardsRestaurants.insertAdjacentElement("afterbegin", card);
 }
 
 function createCardGood(goods) {
@@ -208,17 +218,15 @@ function createCardGood(goods) {
 function openGoods(event) {
   const target = event.target;
   const restaurant = target.closest(".card-restaurant");
-  // console.log(restaurant);
   if (restaurant) {
     if (!login) {
       toggleModalAuth();
     } else {
       cardsMenu.textContent = "";
-      openLinkMenu();
-      getData(`./db/${restaurant.dataset.products}`).then(function (data) {
+      openLinkMenu(restaurant);
+      getData(`./db/${restaurant.products}`).then(function (data) {
         data.forEach(createCardGood);
       });
-      // createCardGood();
     }
   }
 }
@@ -309,10 +317,17 @@ function openLinkRestaurants() {
   restaurants.classList.remove("hide");
   menu.classList.add("hide");
 }
-function openLinkMenu() {
+function openLinkMenu(restaurant) {
+  const [name, price, stars, kitchen] = restaurant.info;
+
   containerPromo.classList.add("hide");
   restaurants.classList.add("hide");
   menu.classList.remove("hide");
+
+  restaurantTitle.textContent = name;
+  rating.textContent = stars;
+  minPrice.textContent = `От ${price} ₽`;
+  category.textContent = kitchen;
 }
 
 function init() {
