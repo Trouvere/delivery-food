@@ -26,6 +26,7 @@ const restaurantTitle = document.querySelector(".restaurant-title");
 const rating = document.querySelector(".rating");
 const minPrice = document.querySelector(".price");
 const category = document.querySelector(".category");
+const inputSearch = document.querySelector(".input-search");
 
 let login = localStorage.getItem("delivery-food");
 const cart = [];
@@ -222,7 +223,6 @@ function openGoods(event) {
     if (!login) {
       toggleModalAuth();
     } else {
-      cardsMenu.textContent = "";
       openLinkMenu(restaurant);
       getData(`./db/${restaurant.products}`).then(function (data) {
         data.forEach(createCardGood);
@@ -319,7 +319,7 @@ function openLinkRestaurants() {
 }
 function openLinkMenu(restaurant) {
   const [name, price, stars, kitchen] = restaurant.info;
-
+  cardsMenu.textContent = "";
   containerPromo.classList.add("hide");
   restaurants.classList.add("hide");
   menu.classList.remove("hide");
@@ -353,6 +353,52 @@ function init() {
   cardsRestaurants.addEventListener("click", openGoods);
 
   logo.addEventListener("click", openLinkRestaurants);
+  inputSearch.addEventListener("keydown", function (event) {
+    if (event.keyCode === 13) {
+      const target = event.target;
+      const value = target.value.toLowerCase().trim();
+      target.value = "";
+      if (!value || value.length < 3) {
+        target.style.backgroundColor = "tomato";
+        setTimeout(function () {
+          target.style.backgroundColor = "";
+        }, 2000);
+        return;
+      }
+
+      const goods = [];
+      getData("./db/partners.json").then(function (data) {
+        const products = data.map(function (item) {
+          return item.products;
+        });
+        products.forEach(function (product) {
+          getData(`./db/${product}`)
+            .then(function (data) {
+              goods.push(...data);
+              const searchGoods = goods.filter(function (item) {
+                return item.name.toLowerCase().includes(value);
+              });
+              console.log(searchGoods);
+           
+              cardsMenu.textContent = "";
+              containerPromo.classList.add("hide");
+              restaurants.classList.add("hide");
+              menu.classList.remove("hide");
+
+              restaurantTitle.textContent = "Результат поиска";
+              rating.textContent = "";
+              minPrice.textContent = "";
+              category.textContent = "";
+
+              return searchGoods;
+            })
+            .then(function (data) {
+              data.forEach(createCardGood);
+            });
+        });
+      });
+    }
+  });
 
   checkAuth();
 }
