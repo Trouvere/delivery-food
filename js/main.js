@@ -71,7 +71,7 @@ function toggleModalAuth() {
 }
 
 function autorized() {
-  console.log("!!!Autorized");
+  // console.log("!!!Autorized");
 
   function logOut(event) {
     event.preventDefault();
@@ -98,11 +98,11 @@ function autorized() {
 }
 
 function nonAautorized() {
-  console.log("nonAautorized");
+  // console.log("nonAautorized");
 
   function logIn(event) {
     event.preventDefault();
-    console.log("logIn");
+    // console.log("logIn");
     login = loginInput.value.trim();
     if (login) {
       if (valid(login)) {
@@ -114,16 +114,16 @@ function nonAautorized() {
         loginInput.value = null;
         login = null;
         alert("Недопустимый логин");
-        console.log(login);
+        // console.log(login);
       }
     } else {
       loginInput.style.borderColor = "red";
       loginInput.value = null;
 
       alert("Требуется ввести логин");
-      console.log("Требуется ввести логин");
+      // console.log("Требуется ввести логин");
     }
-    console.log("checkAuth();");
+    // console.log("checkAuth();");
     buttonAuth.removeEventListener("click", toggleModalAuth);
     closeAuth.removeEventListener("click", toggleModalAuth);
     logInForm.removeEventListener("submit", logIn);
@@ -291,7 +291,7 @@ function renderCart() {
 
 function changeCount(event) {
   const target = event.target;
-  console.log(target.dataset.id);
+  // console.log(target.dataset.id);
 
   if (target.classList.contains("counter-button")) {
     const food = cart.find(function (item) {
@@ -307,7 +307,7 @@ function changeCount(event) {
     if (target.classList.contains("counter-plus")) {
       food.count++;
     }
-    console.log(food);
+    // console.log(food);
     renderCart();
   }
   saveCart();
@@ -378,8 +378,8 @@ function init() {
               const searchGoods = goods.filter(function (item) {
                 return item.name.toLowerCase().includes(value);
               });
-              console.log(searchGoods);
-           
+              // console.log(searchGoods);
+
               cardsMenu.textContent = "";
               containerPromo.classList.add("hide");
               restaurants.classList.add("hide");
